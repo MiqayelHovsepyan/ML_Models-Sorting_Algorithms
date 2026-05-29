@@ -75,3 +75,52 @@ class Linear_Regression:
                 X_test = np.array(X_test)
                 y_pred = (X_test @ self.weights + self.bias).flatten()
                 return y_pred
+
+
+class Linear_Regression_ElasticNet:
+        def __init__(
+            self,
+            learning_rate=0.01,
+            alpha=0.1,
+            l1_ratio=0.5,
+            n_iters=1000
+        ):
+            self.learning_rate = learning_rate
+            self.alpha = alpha
+            self.l1_ratio = l1_ratio
+            self.n_iters = n_iters
+
+        def fit(self, X, y):
+            X_train = np.array(X)
+            y_train = np.array(y).flatten()
+
+            self.weights = np.random.randn(X_train.shape[1]) * 0.01
+            self.bias = 0
+            n_samples = X_train.shape[0]
+
+            for _ in range(self.n_iters):
+                y_pred = (X_train @ self.weights + self.bias).flatten()
+
+                # MSE gradient
+                mse_grad = (2/n_samples) * (
+                    X_train.T @ (y_pred - y_train)
+                )
+
+                # L1 part
+                l1_grad = self.l1_ratio * np.sign(self.weights)
+
+                # L2 part
+                l2_grad = (1 - self.l1_ratio) * 2 * self.weights
+
+                # Total gradient
+                dw = mse_grad + self.alpha * (l1_grad + l2_grad)
+
+                db = (2/n_samples) * np.sum(y_pred - y_train)
+
+                self.weights -= self.learning_rate * dw
+                self.bias -= self.learning_rate * db
+
+        def predict(self, X_test):
+            X_test = np.array(X_test)
+            y_pred = (X_test @ self.weights + self.bias).flatten()
+            return y_pred
